@@ -1,0 +1,11 @@
+torch
+torchvision
+torchaudio
+numpy
+matplotlib
+scikit-image
+scipy
+numba
+Pillow
+tqdm
+git+https://github.com/openai/CLIP.git

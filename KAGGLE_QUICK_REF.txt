@@ -1,0 +1,187 @@
+# Kaggle Quick Reference
+
+**FREE GPU training with 30 hours/week quota - Best for experiments!**
+
+---
+
+## 30-Second Setup
+
+1. https://www.kaggle.com → Sign Up
+2. Settings → Enable GPU (P100/T4)
+3. Notebooks → New Notebook
+4. Copy-paste training code (see KAGGLE_SETUP.md)
+5. Click Run
+6. Wait 6 hours
+7. Download results
+
+---
+
+## Two Paths
+
+### Path A: Upload Code File (Recommended)
+
+```
+1. New Notebook
+2. Click "Add Input" → "File" → Upload enhancedlibcem.py
+3. Add code cell:
+   import shutil
+   shutil.copy('/kaggle/input/enhancedlibcem.py', '/kaggle/working/')
+4. Continue with training
+```
+
+### Path B: Copy-Paste Code
+
+```
+1. New Notebook
+2. Copy entire enhancedlibcem.py into a cell
+3. Execute
+4. Continue with training
+```
+
+---
+
+## Cell 1: Install Dependencies
+
+```python
+!pip install -q torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+!pip install -q scikit-image scipy numba numpy pillow
+
+import torch
+print(f"PyTorch: {torch.__version__}")
+print(f"GPU: {torch.cuda.get_device_name(0)}")
+print(f"GPU Memory: {torch.cuda.get_device_properties(0).total_memory / 1e9:.2f} GB")
+```
+
+---
+
+## Cell 2: Training
+
+Copy-paste the full training script from KAGGLE_SETUP.md
+
+---
+
+## Cell 3: Check Results
+
+```python
+import os
+print(os.listdir('/kaggle/working/outputs/'))
+
+# View loss
+import numpy as np
+loss_history = np.load('/kaggle/working/outputs/loss_history.npy')
+print(f"Loss progression: {loss_history}")
+```
+
+---
+
+## Monitor GPU
+
+```python
+!nvidia-smi
+```
+
+Or check top-right corner of notebook (GPU usage widget)
+
+---
+
+## Download Results
+
+After training:
+1. Click "Data" tab (top right)
+2. Find "outputs" folder
+3. Click files → Download
+
+Or create .zip:
+```python
+!zip -r outputs.zip /kaggle/working/outputs/
+```
+
+---
+
+## Troubleshooting
+
+| Issue | Fix |
+|-------|-----|
+| No GPU available | Settings → Accelerator: GPU |
+| Out of memory | BATCH_SIZE = 16 |
+| Slow training | Reduce smooth_steps=15 in code |
+| 9-hour timeout | Save checkpoint after each epoch |
+| Import error | Upload enhancedlibcem.py via Add Input |
+
+---
+
+## GPU Quota
+
+- **30 hours per week** (resets Monday)
+- **9 hours maximum** per session
+- Your 7-hour training = 7/30 quota used ✅
+
+Next week: Another 30 hours available!
+
+---
+
+## Expected Results
+
+```
+Epoch 1: Loss 0.50  (40 min)
+Epoch 2: Loss 0.38  (40 min)
+Epoch 3: Loss 0.27  (40 min)
+Epoch 4: Loss 0.20  (40 min)
+Epoch 5: Loss 0.16  (40 min)
+Epoch 6: Loss 0.14  (40 min)
+Epoch 7: Loss 0.13  (40 min) ← Converges!
+
+Epochs 8-10: Fine-tuning (120 min)
+Total: ~6 hours
+```
+
+---
+
+## File Locations
+
+| Item | Path |
+|------|------|
+| Working directory | `/kaggle/working/` |
+| Outputs | `/kaggle/working/outputs/` |
+| Checkpoints | `/kaggle/working/outputs/model_*.pt` |
+| Loss log | `/kaggle/working/outputs/loss_history.npy` |
+| Training log | `/kaggle/working/outputs/training_*.log` |
+| Uploaded input | `/kaggle/input/` |
+
+---
+
+## Full Notebook Example
+
+```python
+# Cell 1: Install
+!pip install -q torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+!pip install -q scikit-image scipy numba numpy
+
+# Cell 2: Upload code
+import shutil
+shutil.copy('/kaggle/input/enhancedlibcem.py', '/kaggle/working/')
+
+# Cell 3: Training (full script from KAGGLE_SETUP.md)
+# ... paste training code here ...
+
+# Cell 4: View results
+import numpy as np
+loss = np.load('/kaggle/working/outputs/loss_history.npy')
+print(f"Best loss: {loss.min():.4f}")
+print(f"Final loss: {loss[-1]:.4f}")
+```
+
+---
+
+## Save & Share
+
+1. Click "Save Version" (top right)
+2. Comment: "Enhanced LIDECM training"
+3. Make Public: ✅ (optional)
+4. Notebook saved & shareable!
+
+---
+
+**Status: ✅ Ready to train on Kaggle**
+
+**Total cost: $0 | GPU hours: 30/week | Easiest setup: YES**

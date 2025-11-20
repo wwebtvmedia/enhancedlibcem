@@ -1,0 +1,299 @@
+# COPY-PASTE READY CODE FOR GOOGLE COLAB
+# Each section is one cell - just copy and paste into Colab!
+
+================================================================================
+CELL 1: SETUP & INSTALL
+================================================================================
+
+!pip install -q torch torchvision torchaudio
+!pip install -q git+https://github.com/openai/CLIP.git
+!pip install -q matplotlib numpy tqdm Pillow
+
+import os
+os.makedirs('/content/checkpoints', exist_ok=True)
+os.makedirs('/content/data', exist_ok=True)
+
+import torch
+print(f"✅ Setup complete!")
+print(f"PyTorch: {torch.__version__}")
+print(f"GPU: {torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'Not available'}")
+
+
+================================================================================
+CELL 2: MOUNT GOOGLE DRIVE (Optional)
+================================================================================
+
+from google.colab import drive
+drive.mount('/content/drive')
+print("✓ Google Drive mounted")
+
+
+================================================================================
+CELL 3: UPLOAD CODE
+================================================================================
+
+# Option 1: Upload file via Files icon on left, then:
+exec(open('/content/enhancedlibcem.py').read())
+print("✅ Code loaded!")
+
+# Option 2: Download from GitHub
+# !git clone https://github.com/YOUR_USERNAME/enhancedlibcem.git /content/repo
+# exec(open('/content/repo/enhancedlibcem.py').read())
+
+
+================================================================================
+CELL 4: CHECK IF MODEL EXISTS
+================================================================================
+
+import os
+
+if os.path.exists('/content/improved_lidecm.pt'):
+    print("✓ Pre-trained model found!")
+    print("  Go to CELL 6 for inference")
+    MODEL_EXISTS = True
+else:
+    print("✗ No pre-trained model")
+    print("  Go to CELL 5 for training")
+    MODEL_EXISTS = False
+
+
+================================================================================
+CELL 5: TRAIN MODEL (if doesn't exist)
+================================================================================
+
+if not MODEL_EXISTS:
+    print("\n" + "█"*80)
+    print("█" + "TRAINING MODEL".center(78) + "█")
+    print("█"*80 + "\n")
+    
+    model, loss_history = test_tokenization_and_generation(
+        'CIFAR10', 
+        '/content/data'
+    )
+    
+    # Save to Drive
+    import shutil
+    shutil.copy('/content/improved_lidecm.pt', '/content/drive/MyDrive/')
+    print("\n✓ Model saved to Google Drive")
+else:
+    print("Model already exists, skipping training")
+
+
+================================================================================
+CELL 6: RUN INFERENCE
+================================================================================
+
+print("\n" + "█"*80)
+print("█" + "INFERENCE MODE".center(78) + "█")
+print("█"*80 + "\n")
+
+prompts = [
+    ("a beautiful sunset over mountains", 1.0),
+    ("abstract colorful digital art", 1.3),
+    ("peaceful forest landscape", 0.9),
+    ("futuristic city architecture", 1.1),
+    ("mystical aurora borealis", 1.2),
+]
+
+model = run_inference_only('/content/improved_lidecm.pt', prompts)
+
+
+================================================================================
+CELL 7: DISPLAY RESULTS
+================================================================================
+
+from IPython.display import Image, display
+from pathlib import Path
+
+print("\n" + "="*80)
+print("RESULTS".center(80))
+print("="*80 + "\n")
+
+if Path('/content/inference_results.png').exists():
+    print("Generated Images:\n")
+    display(Image('/content/inference_results.png'))
+
+if Path('/content/generated_images_CIFAR10.png').exists():
+    print("\n\nGenerated Images (Training Set):\n")
+    display(Image('/content/generated_images_CIFAR10.png'))
+
+
+================================================================================
+CELL 8: SAVE RESULTS
+================================================================================
+
+import shutil
+from pathlib import Path
+
+print("Saving results to Google Drive...\n")
+
+save_dir = '/content/drive/MyDrive/Fractal_Model_Results'
+os.makedirs(save_dir, exist_ok=True)
+
+files = [
+    '/content/improved_lidecm.pt',
+    '/content/inference_results.png',
+    '/content/generated_images_CIFAR10.png',
+]
+
+for f in files:
+    if Path(f).exists():
+        shutil.copy(f, save_dir)
+        print(f"✓ {Path(f).name}")
+
+print(f"\n✅ Saved to: {save_dir}")
+
+
+================================================================================
+CELL 9: CUSTOM GENERATION (Run multiple times!)
+================================================================================
+
+# Edit these prompts and run this cell!
+my_prompts = [
+    ("YOUR CUSTOM PROMPT HERE", 1.0),
+    ("ANOTHER PROMPT", 1.2),
+]
+
+model = run_inference_only('/content/improved_lidecm.pt', my_prompts)
+
+from IPython.display import Image, display
+display(Image('/content/inference_results.png'))
+
+
+================================================================================
+CELL 9.5: CLEANUP - REMOVE ALL GENERATED IMAGES & RESTART TRAINING
+================================================================================
+
+import os
+import shutil
+from pathlib import Path
+import logging
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+
+def cleanup_generated_files():
+    """Remove all generated images, checkpoints, and cached data."""
+    
+    cleanup_dirs = [
+        '/content/generated_images',
+        '/content/output_images',
+        '/content/renders',
+        '/content/samples',
+        '/content/validation_outputs',
+        '/content/checkpoints'
+    ]
+    
+    cleanup_files = [
+        '/content/best_model.pt',
+        '/content/checkpoint.pt',
+        '/content/improved_lidecm.pt',
+        '/content/loss_history.txt',
+        '/content/training_log.txt',
+    ]
+    
+    logger.info("=" * 60)
+    logger.info("🧹 CLEANUP: Removing generated files and directories")
+    logger.info("=" * 60)
+    
+    # Remove directories
+    for dir_path in cleanup_dirs:
+        if os.path.exists(dir_path):
+            try:
+                shutil.rmtree(dir_path)
+                logger.info(f"✓ Removed directory: {dir_path}")
+            except Exception as e:
+                logger.warning(f"⚠ Could not remove {dir_path}: {e}")
+    
+    # Remove files
+    for file_path in cleanup_files:
+        if os.path.exists(file_path):
+            try:
+                os.remove(file_path)
+                logger.info(f"✓ Removed file: {file_path}")
+            except Exception as e:
+                logger.warning(f"⚠ Could not remove {file_path}: {e}")
+    
+    logger.info("=" * 60)
+    logger.info("✅ CLEANUP COMPLETE - Ready for fresh training!")
+    logger.info("=" * 60)
+
+# Run cleanup
+cleanup_generated_files()
+
+# Confirm cleanup
+print("\n📋 CLEANUP SUMMARY:")
+print(f"  Generated images: {'REMOVED' if not os.path.exists('/content/generated_images') else 'Still exist'}")
+print(f"  Checkpoints: {'REMOVED' if not os.path.exists('/content/improved_lidecm.pt') else 'Still exist'}")
+print(f"\n🔄 Ready to run CELL 5 for fresh training with enhanced parameters!")
+
+
+================================================================================
+CELL 10: MONITORING (Run while training in another cell)
+================================================================================
+
+!nvidia-smi
+
+# Or for continuous monitoring:
+# !watch -n 1 nvidia-smi
+
+
+================================================================================
+CELL 11: MEMORY MANAGEMENT
+================================================================================
+
+import torch
+
+print("Clearing GPU cache...")
+torch.cuda.empty_cache()
+
+if torch.cuda.is_available():
+    props = torch.cuda.get_device_properties(0)
+    total = props.total_memory / 1e9
+    allocated = torch.cuda.memory_allocated() / 1e9
+    reserved = torch.cuda.memory_reserved() / 1e9
+    
+    print(f"\nGPU Memory:")
+    print(f"  Total: {total:.2f} GB")
+    print(f"  Allocated: {allocated:.2f} GB")
+    print(f"  Reserved: {reserved:.2f} GB")
+
+
+================================================================================
+QUICK START (COPY THIS TO NEW COLAB NOTEBOOK)
+================================================================================
+
+# PASTE EVERYTHING BELOW INTO ONE CELL:
+
+!pip install -q torch torchvision torchaudio git+https://github.com/openai/CLIP.git matplotlib numpy tqdm Pillow
+
+# Mount Drive
+from google.colab import drive; drive.mount('/content/drive')
+
+# Make directories
+import os
+os.makedirs('/content/data', exist_ok=True)
+
+# Load code (upload enhancedlibcem.py first!)
+exec(open('/content/enhancedlibcem.py').read())
+
+# Train or load model
+import os
+if not os.path.exists('/content/improved_lidecm.pt'):
+    model, loss = test_tokenization_and_generation('CIFAR10', '/content/data')
+else:
+    print("Loading pre-trained model...")
+
+# Generate images
+model = run_inference_only('/content/improved_lidecm.pt')
+
+# Display
+from IPython.display import Image, display
+display(Image('/content/inference_results.png'))
+
+print("\n✅ DONE!")
+
+
+================================================================================
+END OF COLAB CODE
+================================================================================

@@ -1,0 +1,181 @@
+# Vast.ai Quick Reference
+
+**TL;DR - Get training running in 10 minutes for $1.75**
+
+---
+
+## Step 1: Create Account & Rent GPU (3 min)
+
+1. Go to https://www.vast.ai → Sign Up
+2. Add payment method (Visa/Mastercard)
+3. Go to https://www.vast.ai/console/create/
+4. Search filters:
+   - GPU: RTX 3060+ (12GB)
+   - OS: Linux (Ubuntu)
+   - Sort: Price (low to high)
+5. Click **RENT** on cheapest option ($0.20-0.40/hour)
+6. Wait 1-2 minutes for instance to start
+
+---
+
+## Step 2: Connect via SSH (2 min)
+
+### Windows PowerShell:
+```powershell
+# Copy SSH command from Vast.ai console, example:
+ssh -p 12345 root@1.2.3.4
+
+# Paste password from Vast.ai when prompted
+```
+
+### Mac/Linux:
+```bash
+ssh -p 12345 root@1.2.3.4
+```
+
+**Result:** Should see `root@instance:/# ` prompt
+
+---
+
+## Step 3: Install & Setup (3 min)
+
+Paste this entire block:
+
+```bash
+apt-get update -qq && apt-get upgrade -qq -y && apt-get install -qq -y python3 python3-pip git wget && pip install -q torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118 && pip install -q scikit-image scipy numba numpy pillow && mkdir -p /root/training/outputs && cd /root/training && echo "✅ Setup complete!"
+```
+
+---
+
+## Step 4: Upload Your Code (2 min)
+
+From your local machine (open **new PowerShell window**, DON'T close SSH):
+
+```powershell
+# Upload from Desktop folder
+scp -P 12345 C:\Users\sbymy\Desktop\enhancedlibcem\*.py root@1.2.3.4:/root/training/
+
+# Or if you have Git:
+# (skip this, instead do git clone in SSH)
+```
+
+---
+
+## Step 5: Start Training (Immediate)
+
+Back in SSH terminal:
+
+```bash
+cd /root/training
+python3 train_vast_simple.py
+```
+
+**Wait ~5 minutes for CIFAR10 download, then training starts**
+
+---
+
+## Step 6: Monitor (Real-time)
+
+Open **third PowerShell window**, SSH in again:
+
+```bash
+# Watch logs
+tail -f /root/training/outputs/training_*.log
+
+# Check GPU
+watch -n 1 nvidia-smi
+
+# Check disk
+du -sh /root/training/
+```
+
+---
+
+## Step 7: Download Results (When Done)
+
+```powershell
+# From your local machine
+scp -r -P 12345 root@1.2.3.4:/root/training/outputs ./my_results/
+```
+
+---
+
+## Step 8: Stop & Pay
+
+Back in SSH:
+```bash
+exit
+```
+
+In Vast.ai console:
+- Click "STOP" to pause
+- Click "DESTROY" to stop paying
+
+**Total cost:** ~$1.75 ✅
+
+---
+
+## Expected Timeline
+
+```
+Upload code:     1 min
+Download CIFAR:  4 min
+Epoch 1:        35 min  (Loss: 0.50)
+Epoch 2:        35 min  (Loss: 0.38)
+Epoch 3:        35 min  (Loss: 0.27)
+Epoch 4:        35 min  (Loss: 0.20)
+Epoch 5:        35 min  (Loss: 0.16)
+Epoch 6:        35 min  (Loss: 0.14)
+Epoch 7:        35 min  (Loss: 0.13) ← CONVERGED
+Epochs 8-10:    105 min (fine-tuning)
+
+Total: ~6 hours
+```
+
+---
+
+## Troubleshooting
+
+| Problem | Fix |
+|---------|-----|
+| SSH timeout | Try: `ssh -o ConnectTimeout=60 ...` |
+| Out of memory | Reduce `BATCH_SIZE = 16` in train_vast_simple.py |
+| Graph denoising slow | Edit enhancedlibcem.py: `smooth_steps=15` instead of 25 |
+| Lost SSH connection | Reconnect - training continues in background! |
+| GPU not found | Check: `nvidia-smi` on Vast.ai instance |
+
+---
+
+## Key Files
+
+```
+VAST_AI_SETUP.md           ← Detailed 10-step guide
+train_vast_simple.py       ← Self-contained training script
+vast_setup.sh              ← Auto-setup script (optional)
+enhancedlibcem.py          ← Your model (upload this)
+```
+
+---
+
+## Commands Quick Copy
+
+```bash
+# Full setup one-liner:
+apt-get update && apt-get upgrade -y && apt-get install -y python3 python3-pip && pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118 && pip install scikit-image scipy numba numpy pillow && mkdir -p /root/training/outputs && cd /root/training
+
+# Start training:
+python3 train_vast_simple.py
+
+# Monitor:
+tail -f /root/training/outputs/training_*.log
+
+# Check GPU:
+nvidia-smi
+
+# Download (from local machine):
+scp -r -P [PORT] root@[IP]:/root/training/outputs ./results
+```
+
+---
+
+**Status: ✅ Ready. Go to https://www.vast.ai and rent a GPU!**

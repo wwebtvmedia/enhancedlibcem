@@ -1,0 +1,11 @@
+Device: cpu
+Model parameters: 5,988,109
+NORM_MEAN/NORM_STD not found in enhancedlibcem; using default normalization [-1,1]
+Saved original images
+Input dummy requires_grad: True
+E-step: token_indices shape: torch.Size([32])
+E-step: mean assignment confidence: 0.407827
+M-step: returned loss: 2.705199956893921
+Saved reconstructed images from tokenizer.decode
+EM status: {'global_sigma': '0.3000', 'global_tau': '0.1000', 'global_radius': '10.00', 'avg_loss': '8.4759'}
+NaN in grads: False, Inf in grads: False
